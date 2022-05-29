@@ -2,91 +2,10 @@ const {
   ApiGatewayManagementApiClient,
   PostToConnectionCommand,
 } = require('@aws-sdk/client-apigatewaymanagementapi');
-const {
-  DynamoDBClient,
-  PutItemCommand,
-  DeleteItemCommand,
-  ScanCommand,
-} = require('@aws-sdk/client-dynamodb');
+const { DynamoDBClient, ScanCommand } = require('@aws-sdk/client-dynamodb');
+const { formatJsonError, successfulResponse } = require('./src/libs');
 
 const connectionTable = process.env.CONNECTION_TABLE;
-
-const successfulResponse = {
-  statusCode: 200,
-  body: JSON.stringify({ message: 'success' }),
-};
-
-const formatJsonError = (statusCode, error) => {
-  console.dir(error);
-  return {
-    statusCode: statusCode,
-    body: JSON.stringify({
-      message: 'error',
-      error: {
-        message:
-          typeof error == 'string'
-            ? error
-            : error.message
-            ? error.message
-            : 'Unknown error',
-        stack: error.stack || {},
-      },
-    }),
-  };
-};
-
-module.exports.connect = async (event, _context, callback) => {
-  const connectionId = event.requestContext?.connectionId;
-  if (!connectionId) {
-    callback(
-      formatJsonError(400, 'Cannot add connection due to falsy connection ID.')
-    );
-  }
-
-  const command = new PutItemCommand({
-    TableName: connectionTable,
-    Item: {
-      connectionId: {
-        S: connectionId,
-      },
-    },
-  });
-
-  const client = new DynamoDBClient({ region: process.env.REGION });
-
-  try {
-    await client.send(command);
-    callback(null, successfulResponse);
-  } catch (err) {
-    callback(formatJsonError(500, err));
-  }
-};
-
-module.exports.disconnect = (event) => {
-  const connectionId = event.requestContext?.connectionId;
-  if (!connectionId) {
-    throw new Error(
-      `Cannot delete connection. Invalid connection ID "${connectionId}"`
-    );
-  }
-
-  const command = new DeleteItemCommand({
-    TableName: connectionTable,
-    Key: {
-      connectionId: {
-        S: connectionId,
-      },
-    },
-  });
-
-  const client = new DynamoDBClient({ region: process.env.REGION });
-  client
-    .send(command)
-    .then(() => callback(null, successfulResponse))
-    .catch((err) => {
-      callback(formatJsonError(500, err));
-    });
-};
 
 module.exports.defaultHandler = (event, _context, callback) => {
   console.warn(`Default handler invoked:\n${event}`);

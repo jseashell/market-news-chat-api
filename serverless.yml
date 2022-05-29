@@ -42,12 +42,12 @@ package:
 
 functions:
   connect:
-    handler: handler.connect
+    handler: ./src/functions/handler.connect
     events:
       - websocket:
           route: $connect
   disconnect:
-    handler: handler.disconnect
+    handler: ./src/functions/handler.disconnect
     events:
       - websocket:
           route: $disconnect
