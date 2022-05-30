@@ -20,3 +20,17 @@ module.exports.formatJsonError = (statusCode, error) => {
     }),
   };
 };
+
+module.exports.postToConnection = async (event, connectionId, data) => {
+  const command = new PostToConnectionCommand({
+    ConnectionId: connectionId,
+    Data: data,
+  });
+
+  const client = new ApiGatewayManagementApiClient({
+    region: process.env.REGION,
+    endpoint: `https://${event.requestContext.domainName}/${event.requestContext.stage}`,
+  });
+
+  return client.send(command);
+};

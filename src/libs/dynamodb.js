@@ -29,3 +29,12 @@ module.exports.deleteItem = (connectionId) => {
 
   return newClient().send(command);
 };
+
+module.exports.scan = async () => {
+  const command = new ScanCommand({
+    TableName: connectionTable,
+    ProjectionExpression: 'connectionId',
+  });
+
+  return newClient().send(command);
+};

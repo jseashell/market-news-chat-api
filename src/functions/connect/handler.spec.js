@@ -8,11 +8,11 @@ describe('connect', () => {
   const mockConnectionId = 'example-id-000';
   const mockEvent = { requestContext: { connectionId: mockConnectionId } };
   const mockContext = null; // unused in handler.js
-  let mockSend;
+  let mockPutItem;
 
   beforeEach(() => {
-    mockSend = jest.fn();
-    putItem.mockImplementationOnce(mockSend);
+    mockPutItem = jest.fn();
+    putItem.mockImplementationOnce(mockPutItem);
   });
 
   afterAll(() => {
@@ -20,11 +20,11 @@ describe('connect', () => {
   });
 
   it("should insert the client's connection ID into an RDS database", async () => {
-    const callback = jest.fn();
-    await connect(mockEvent, mockContext, callback);
+    const mockCallback = jest.fn();
+    await connect(mockEvent, mockContext, mockCallback);
 
-    expect(mockSend).toHaveBeenCalled();
-    expect(callback).toHaveBeenCalledWith(null, successfulResponse);
+    expect(mockPutItem).toHaveBeenCalled();
+    expect(mockCallback).toHaveBeenCalledWith(null, successfulResponse);
   });
 
   it('should callback a 400 error when a connection ID is not provided in the request context', async () => {
@@ -32,7 +32,7 @@ describe('connect', () => {
     const mockCallback = jest.fn();
     await connect(invalidEvent, mockContext, mockCallback);
 
-    expect(mockSend).not.toHaveBeenCalled();
+    expect(mockPutItem).not.toHaveBeenCalled();
     expect(mockCallback).toHaveBeenCalledWith(
       expect.objectContaining({
         statusCode: 400,

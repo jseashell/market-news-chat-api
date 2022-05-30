@@ -8,11 +8,11 @@ describe('disconnect', () => {
   const mockConnectionId = 'example-id-000';
   const mockEvent = { requestContext: { connectionId: mockConnectionId } };
   const mockContext = null; // unused in handler.js
-  let mockSend;
+  let mockDeleteItem;
 
   beforeEach(() => {
-    mockSend = jest.fn();
-    deleteItem.mockImplementationOnce(mockSend);
+    mockDeleteItem = jest.fn();
+    deleteItem.mockImplementationOnce(mockDeleteItem);
   });
 
   afterAll(() => {
@@ -20,11 +20,11 @@ describe('disconnect', () => {
   });
 
   it("should remove the client's connection ID from an RDS database", async () => {
-    const callback = jest.fn();
-    await disconnect(mockEvent, mockContext, callback);
+    const mockCallback = jest.fn();
+    await disconnect(mockEvent, mockContext, mockCallback);
 
-    expect(mockSend).toHaveBeenCalled();
-    expect(callback).toHaveBeenCalledWith(null, successfulResponse);
+    expect(mockDeleteItem).toHaveBeenCalled();
+    expect(mockCallback).toHaveBeenCalledWith(null, successfulResponse);
   });
 
   it('should callback a 400 error when a connection ID is not provided in the request context', async () => {
@@ -32,7 +32,7 @@ describe('disconnect', () => {
     const mockCallback = jest.fn();
     await disconnect(invalidEvent, mockContext, mockCallback);
 
-    expect(mockSend).not.toHaveBeenCalled();
+    expect(mockDeleteItem).not.toHaveBeenCalled();
     expect(mockCallback).toHaveBeenCalledWith(
       expect.objectContaining({
         statusCode: 400,
